@@ -1,0 +1,10 @@
+streamlit
+sentence-transformers
+scikit-learn
+joblib
+pandas
+numpy
+textstat
+nrclex
+empath
+vaderSentiment
