@@ -9,3 +9,5 @@ vaderSentiment
 empath
 nrclex
 textstat
+matplotlib
+
