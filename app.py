@@ -4,12 +4,38 @@ import numpy as np
 import pandas as pd
 import re
 import os
+import nltk
+import gdown
 
 from sentence_transformers import SentenceTransformer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from empath import Empath
 from nrclex import NRCLex
 import textstat
+
+# --------------------------------------------------
+# SETUP: Download NLTK and Large Files
+# --------------------------------------------------
+@st.cache_resource
+def initial_setup():
+    # 1. Download NLTK corpora to fix MissingCorpusError
+    nltk.download('punkt')
+    nltk.download('punkt_tab')
+    nltk.download('wordnet')
+    nltk.download('omw-1.4')
+    
+    # 2. Download Large Files from Google Drive
+    files_to_download = {
+        "ptsd_secondary_dataset.npz": "1M-sPAdD5M0tedxHe4byan4j9ANw4QRIc",
+        "sbert_embeddings.npy": "1Se3eXuc6-3v8hTh_nV41xH1s_bnSQ65G"
+    }
+    
+    for filename, file_id in files_to_download.items():
+        if not os.path.exists(filename):
+            url = f'https://drive.google.com/uc?id={file_id}'
+            gdown.download(url, filename, quiet=False)
+
+initial_setup()
 
 # --------------------------------------------------
 # Page config
@@ -25,7 +51,7 @@ st.set_page_config(
 MODEL_FILE = "final_ptsd_textonly_model.pkl"
 
 if not os.path.exists(MODEL_FILE):
-    st.error("Model file not found. Place final_ptsd_textonly_model.pkl in this folder.")
+    st.error(f"Model file '{MODEL_FILE}' not found. Please upload it to your GitHub repository.")
     st.stop()
 
 model_pkg = joblib.load(MODEL_FILE)
@@ -88,7 +114,9 @@ def compute_text_features(text):
     for c in empath_categories:
         feats[f"empath_{c}"] = empath_scores.get(c, 0)
 
-    emo = NRCLex(text).raw_emotion_scores
+    # Use NRCLex
+    emo_obj = NRCLex(text)
+    emo = emo_obj.raw_emotion_scores
     for e in nrc_emotions:
         feats[f"nrc_{e}"] = emo.get(e, 0)
 
@@ -105,9 +133,7 @@ def compute_text_features(text):
 
 def build_feature_vector(text):
     text = clean_text(text)
-
     emb = sbert.encode([text])[0]
-
     meta = compute_text_features(text)
     meta_vec = []
 
@@ -131,10 +157,8 @@ page = st.sidebar.radio("Go to", ["Home", "Prediction", "EDA"])
 # --------------------------------------------------
 if page == "Home":
     st.title("PTSD Severity Prediction System")
-
     st.markdown("""
-    **Project Title**  
-    *Language and Sentiment Analysis of Therapy Session Transcripts for PTSD Severity Prediction*
+    **Project Title** *Language and Sentiment Analysis of Therapy Session Transcripts for PTSD Severity Prediction*
 
     **Final Model**
     - Logistic Regression (Text-only)
@@ -145,8 +169,6 @@ if page == "Home":
     - Trauma lexicon counts  
     - Empath & NRC emotion features  
     - Readability & toxicity metrics  
-
-    
     """)
 
 # --------------------------------------------------
@@ -154,19 +176,21 @@ if page == "Home":
 # --------------------------------------------------
 elif page == "Prediction":
     st.title("PTSD Severity Prediction")
-
     mode = st.radio("Input type", ["Custom Text", "Sample from Dataset"])
 
     sample_text = ""
 
     if mode == "Custom Text":
         sample_text = st.text_area("Enter therapy-style text", height=180)
-
     else:
-        df = pd.read_csv("ptsd_secondary_dataset.csv")
-        idx = st.selectbox("Select a sample", df.index)
-        sample_text = df.loc[idx, "text"]
-        st.write(sample_text)
+        # Load the CSV file - ensure you have uploaded this to GitHub too!
+        if os.path.exists("ptsd_secondary_dataset.csv"):
+            df = pd.read_csv("ptsd_secondary_dataset.csv")
+            idx = st.selectbox("Select a sample", df.index)
+            sample_text = df.loc[idx, "text"]
+            st.write(sample_text)
+        else:
+            st.error("ptsd_secondary_dataset.csv not found in repository.")
 
     if st.button("Predict"):
         if len(sample_text.strip()) < 10:
@@ -224,37 +248,28 @@ elif page == "Prediction":
 # --------------------------------------------------
 elif page == "EDA":
     st.title("Exploratory Data Analysis (EDA)")
+    if os.path.exists("ptsd_secondary_dataset.csv"):
+        df = pd.read_csv("ptsd_secondary_dataset.csv")
+        st.markdown(
+            "This section provides **descriptive insights** into the dataset. "
+            "These visualizations do **not** affect model predictions."
+        )
 
-    df = pd.read_csv("ptsd_secondary_dataset.csv")
+        st.subheader("1️⃣ Severity Class Distribution")
+        st.bar_chart(df["severity_class"].value_counts())
 
-    st.markdown(
-        "This section provides **descriptive insights** into the dataset. "
-        "These visualizations do **not** affect model predictions."
-    )
+        st.subheader("2️⃣ Severity Score Distribution")
+        st.bar_chart(np.histogram(df["severity_score"], bins=30)[0])
 
-    st.subheader("1️⃣ Severity Class Distribution")
-    st.bar_chart(df["severity_class"].value_counts())
+        st.subheader("3️⃣ Trauma Count vs Severity Class")
+        st.bar_chart(df.groupby("severity_class")["trauma_count"].mean())
 
-    st.subheader("2️⃣ Severity Score Distribution")
-    st.bar_chart(np.histogram(df["severity_score"], bins=30)[0])
+        st.subheader("4️⃣ Correlation Matrix (Key Features)")
+        corr_features = ["severity_score", "trauma_count", "sentiment", "empath_fear", "nrc_fear"]
+        corr = df[corr_features].corr()
+        st.dataframe(corr.style.background_gradient(cmap="coolwarm"))
 
-    st.subheader("3️⃣ Trauma Count vs Severity Class")
-    st.bar_chart(
-        df.groupby("severity_class")["trauma_count"].mean()
-    )
-
-    st.subheader("4️⃣ Correlation Matrix (Key Features)")
-    corr_features = [
-        "severity_score",
-        "trauma_count",
-        "sentiment",
-        "empath_fear",
-        "nrc_fear"
-    ]
-    corr = df[corr_features].corr()
-    st.dataframe(corr.style.background_gradient(cmap="coolwarm"))
-
-    st.subheader("5️⃣ Sentiment vs Severity Class")
-    st.bar_chart(
-        df.groupby("severity_class")["sentiment"].mean()
-    )
+        st.subheader("5️⃣ Sentiment vs Severity Class")
+        st.bar_chart(df.groupby("severity_class")["sentiment"].mean())
+    else:
+        st.error("ptsd_secondary_dataset.csv not found.")
