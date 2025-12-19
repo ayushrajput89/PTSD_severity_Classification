@@ -1,10 +1,11 @@
 streamlit
-sentence-transformers
-scikit-learn
 joblib
-pandas
 numpy
-textstat
-nrclex
-empath
+pandas
+nltk
+gdown
+sentence-transformers
 vaderSentiment
+empath
+nrclex
+textstat
