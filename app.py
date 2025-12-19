@@ -6,6 +6,7 @@ import re
 import os
 import nltk
 import gdown
+import matplotlib.pyplot as plt
 
 from sentence_transformers import SentenceTransformer
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -273,3 +274,4 @@ elif page == "EDA":
         st.bar_chart(df.groupby("severity_class")["sentiment"].mean())
     else:
         st.error("ptsd_secondary_dataset.csv not found.")
+
