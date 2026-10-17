@@ -220,4 +220,4 @@ MIT License — see [LICENSE](LICENSE) file.
 
 ## Author
 
-**Ayush Rajput** — MTech CSE
+**Ayush Rajput** 
