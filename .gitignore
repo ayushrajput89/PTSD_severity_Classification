@@ -1,0 +1,39 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Embeddings (large binary files)
+data/processed/*.npy
+data/processed/*.npz
+
+# Deep Learning model weights (too large for GitHub)
+models/deep_learning/*.pt
+models/deep_learning/*.bin
+models/deep_learning/tokenizer/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# NLTK data
+nltk_data/
+
+# Logs
+*.log
+mlruns/

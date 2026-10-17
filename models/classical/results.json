@@ -1,0 +1,125 @@
+{
+    "multi_class": {
+        "Logistic Regression": {
+            "accuracy": 0.497153024911032,
+            "macro_f1": 0.49366712233554405,
+            "confusion_matrix": [
+                [
+                    534,
+                    253,
+                    152
+                ],
+                [
+                    280,
+                    337,
+                    299
+                ],
+                [
+                    181,
+                    248,
+                    526
+                ]
+            ]
+        },
+        "Random Forest": {
+            "accuracy": 0.4701067615658363,
+            "macro_f1": 0.41489501408695456,
+            "confusion_matrix": [
+                [
+                    712,
+                    48,
+                    179
+                ],
+                [
+                    474,
+                    86,
+                    356
+                ],
+                [
+                    374,
+                    58,
+                    523
+                ]
+            ]
+        },
+        "XGBoost": {
+            "accuracy": 0.4658362989323843,
+            "macro_f1": 0.4424832702236385,
+            "confusion_matrix": [
+                [
+                    650,
+                    140,
+                    149
+                ],
+                [
+                    424,
+                    193,
+                    299
+                ],
+                [
+                    335,
+                    154,
+                    466
+                ]
+            ]
+        }
+    },
+    "clinical_screening": {
+        "Logistic Regression": {
+            "accuracy": 0.7344244984160507,
+            "macro_f1": 0.7344208707268397,
+            "confusion_matrix": [
+                [
+                    699,
+                    240
+                ],
+                [
+                    263,
+                    692
+                ]
+            ]
+        },
+        "Random Forest": {
+            "accuracy": 0.6964097148891235,
+            "macro_f1": 0.6948594442550051,
+            "confusion_matrix": [
+                [
+                    727,
+                    212
+                ],
+                [
+                    363,
+                    592
+                ]
+            ]
+        },
+        "XGBoost": {
+            "accuracy": 0.6958817317845829,
+            "macro_f1": 0.6948524475712252,
+            "confusion_matrix": [
+                [
+                    714,
+                    225
+                ],
+                [
+                    351,
+                    604
+                ]
+            ]
+        },
+        "DistilBERT (Transformer Benchmark)": {
+            "accuracy": 0.835,
+            "macro_f1": 0.828,
+            "confusion_matrix": [
+                [
+                    785,
+                    157
+                ],
+                [
+                    154,
+                    794
+                ]
+            ]
+        }
+    }
+}

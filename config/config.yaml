@@ -1,0 +1,120 @@
+# ============================================================
+# PTSD Severity Classification — Project Configuration
+# ============================================================
+
+project:
+  name: "PTSD Severity NLP"
+  version: "2.0.0"
+  author: "Ayu Raj"
+  description: "Language and Sentiment Analysis for PTSD Severity Prediction"
+
+data:
+  raw_file: "data/raw/PTSD_data_20k.csv"
+  processed_file: "data/processed/ptsd_processed.csv"
+  features_file: "data/processed/ptsd_features.csv"
+  embeddings_file: "data/processed/sbert_embeddings.npy"
+  train_file: "data/splits/train.csv"
+  val_file: "data/splits/val.csv"
+  test_file: "data/splits/test.csv"
+  
+  # Text cleaning
+  min_text_length: 15
+  remove_duplicates: true
+
+  # Proxy severity labeling
+  severity_weights:
+    react_angry: 3.0
+    react_sad: 2.0
+    react_wow: 1.0
+  quantile_bins: [0.33, 0.66]
+  class_names: ["Low", "Moderate", "High"]
+
+  # Train/val/test split
+  test_size: 0.15
+  val_size: 0.15
+  random_state: 42
+  stratify: true
+
+features:
+  sbert_model: "sentence-transformers/all-MiniLM-L6-v2"
+  sbert_dim: 384
+
+  # Empath categories
+  empath_categories:
+    - "fear"
+    - "violence"
+    - "sadness"
+    - "anger"
+    - "aggression"
+    - "negative_emotion"
+    - "suffering"
+    - "death"
+    - "nervousness"
+    - "pain"
+    - "horror"
+    - "shame"
+    - "grief"
+
+  # NRC emotions
+  nrc_emotions:
+    - "anger"
+    - "fear"
+    - "sadness"
+    - "disgust"
+    - "joy"
+    - "trust"
+    - "anticipation"
+    - "surprise"
+
+models:
+  classical:
+    save_dir: "models/classical"
+    cv_folds: 5
+    scoring: "f1_macro"
+    
+    logistic_regression:
+      C: [0.01, 0.1, 1.0, 10.0]
+      max_iter: 2000
+      solver: "lbfgs"
+      
+    svm:
+      C: [0.1, 1.0, 10.0]
+      kernel: ["linear", "rbf"]
+      
+    random_forest:
+      n_estimators: [100, 300, 500]
+      max_depth: [10, 20, null]
+      min_samples_split: [2, 5]
+      
+    xgboost:
+      n_estimators: [100, 300, 500]
+      max_depth: [3, 6, 10]
+      learning_rate: [0.01, 0.1, 0.3]
+      subsample: [0.8, 1.0]
+
+  deep_learning:
+    save_dir: "models/deep_learning"
+    model_name: "distilbert-base-uncased"
+    max_length: 256
+    batch_size: 16
+    epochs: 5
+    learning_rate: 2.0e-5
+    warmup_ratio: 0.1
+    weight_decay: 0.01
+    early_stopping_patience: 3
+    fp16: true
+
+explainability:
+  shap:
+    n_samples: 100
+    max_display: 20
+  lime:
+    n_features: 15
+    n_samples: 500
+
+streamlit:
+  theme: "dark"
+  primary_color: "#4EA8DE"
+  background_color: "#0E1117"
+  secondary_bg: "#1E1E1E"
+  text_color: "#FAFAFA"
